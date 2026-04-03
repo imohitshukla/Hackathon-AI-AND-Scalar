@@ -1,0 +1,15 @@
+version: "1.0"
+environment:
+  name: warehouse-robot-env
+  type: docker
+  image: warehouse-robot-env
+  description: dynamic warehouse robot with 5-tier ladder, procedural gen, fire, energy, fog, conveyors
+  tasks:
+    - tier1_rookie
+    - tier2_navigator
+    - tier3_hauler
+    - tier4_survivor
+    - tier5_ghost_runner
+  build:
+    context: "."
+    dockerfile: Dockerfile
