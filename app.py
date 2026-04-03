@@ -36,8 +36,10 @@ def health_check():
 
 
 @app.post("/reset")
-def reset(req: ResetRequest):
-    obs = env.reset(req.task_name)
+def reset(req: Optional[ResetRequest] = None):
+    # if validator sends no body, default to tier1
+    t_name = req.task_name if req else "tier1_rookie"
+    obs = env.reset(t_name)
     return obs.model_dump()
 
 
