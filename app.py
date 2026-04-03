@@ -1,0 +1,64 @@
+# app.py - HTTP API server for HF Spaces deployment
+# exposes the warehouse env via REST so the validator can hit it
+
+from fastapi import FastAPI
+from pydantic import BaseModel
+from typing import Optional
+from environment import WarehouseEnv, Action, Observation
+
+app = FastAPI(title="Dynamic Warehouse Robot - OpenEnv")
+
+# keep one env instance per session (good enough for eval)
+env = WarehouseEnv()
+
+
+class ResetRequest(BaseModel):
+    task_name: str = "tier1_rookie"
+
+class StepRequest(BaseModel):
+    action: str
+
+class StepResponse(BaseModel):
+    observation: Observation
+    reward: float
+    done: bool
+    error: Optional[str] = None
+
+
+@app.get("/")
+def health():
+    return {"status": "ok", "env": "warehouse-robot-env", "tiers": list(WarehouseEnv.__init__.__code__.co_varnames)[:5]}
+
+
+@app.get("/health")
+def health_check():
+    return {"status": "ok"}
+
+
+@app.post("/reset")
+def reset(req: ResetRequest):
+    obs = env.reset(req.task_name)
+    return obs.model_dump()
+
+
+@app.post("/step")
+def step(req: StepRequest):
+    action = Action(action=req.action)
+    obs, reward, done, error = env.step(action)
+    return StepResponse(
+        observation=obs,
+        reward=reward,
+        done=done,
+        error=error,
+    ).model_dump()
+
+
+@app.get("/state")
+def state():
+    return env.state()
+
+
+@app.get("/tasks")
+def list_tasks():
+    from environment import TIERS
+    return {"tasks": list(TIERS.keys())}
