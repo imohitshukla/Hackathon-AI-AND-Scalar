@@ -1,3 +1,11 @@
+---
+title: Warehouse Robot Env
+emoji: 🤖
+colorFrom: blue
+colorTo: green
+sdk: docker
+app_port: 7860
+---
 # Dynamic Warehouse Robot — OpenEnv
 
 A 5-tier warehouse robot environment with progressively unlocking mechanics. Built for the OpenEnv framework.
