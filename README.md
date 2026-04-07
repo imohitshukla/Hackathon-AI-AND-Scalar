@@ -5,6 +5,7 @@ colorFrom: blue
 colorTo: green
 sdk: docker
 app_port: 7860
+app_file: server/app.py
 ---
 # Dynamic Warehouse Robot — OpenEnv
 
