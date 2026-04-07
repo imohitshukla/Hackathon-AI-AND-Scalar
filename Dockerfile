@@ -1,4 +1,4 @@
-FROM python:3.10-bookworm
+FROM public.ecr.aws/docker/library/python:3.10-slim
 
 RUN useradd -m -u 1000 user
 USER user
