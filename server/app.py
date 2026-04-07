@@ -24,6 +24,7 @@ class StepRequest(BaseModel):
 class StepResponse(BaseModel):
     observation: Observation
     reward: float
+    score: float
     done: bool
     error: Optional[str] = None
 
@@ -53,6 +54,7 @@ def step(req: StepRequest):
     return StepResponse(
         observation=obs,
         reward=reward,
+        score=reward,
         done=done,
         error=error,
     ).model_dump()

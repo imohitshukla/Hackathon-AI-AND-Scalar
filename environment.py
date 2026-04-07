@@ -21,6 +21,7 @@ class Observation(BaseModel):
     task_instruction: str
     done: bool
     reward: float
+    score: float                   # adding explicit score field for Phase 2 validator
     energy: int                    # -1 means infinite (tiers without energy)
     max_energy: int
     fire_count: int                # how many fire cells on the grid
@@ -390,7 +391,8 @@ class WarehouseEnv:
             max_steps=self.max_steps,
             task_instruction=self.instruction,
             done=self.is_done,
-            reward=round(min(0.99, max(0.01, self.reward)), 2),
+            reward=float(min(0.999, max(0.001, self.reward))),
+            score=float(min(0.999, max(0.001, self.reward))),
             energy=self.energy,
             max_energy=self.max_energy,
             fire_count=len(self.fire_cells),
@@ -506,7 +508,7 @@ class WarehouseEnv:
 
         if self.is_done:
             self.last_error = "Episode already done."
-            return self._make_obs(), round(min(0.99, max(0.01, self.reward)), 2), True, self.last_error
+            return self._make_obs(), float(min(0.999, max(0.001, self.reward))), True, self.last_error
 
         self.step_count += 1
         cmd = action.action.strip().lower()
@@ -517,7 +519,7 @@ class WarehouseEnv:
             self.is_done = True
             self.last_error = "Out of energy!"
             self.reward = self._compute_reward()
-            return self._make_obs(), round(self.reward, 2), True, self.last_error
+            return self._make_obs(), float(min(0.999, max(0.001, self.reward))), True, self.last_error
 
         if cmd in DIRS:
             dr, dc = DIRS[cmd]
@@ -602,14 +604,16 @@ class WarehouseEnv:
             if not self.last_error:
                 self.last_error = "Out of energy!"
 
-        return self._make_obs(), round(min(0.99, max(0.01, self.reward)), 2), self.is_done, self.last_error
+        return self._make_obs(), float(min(0.999, max(0.001, self.reward))), self.is_done, self.last_error
 
     def state(self) -> Dict[str, Any]:
+        val = float(min(0.999, max(0.001, self.reward)))
         return {
             "episode_id": self.episode_id,
             "step_count": self.step_count,
             "task": self.current_task,
-            "reward": round(min(0.99, max(0.01, self.reward)), 2),
+            "reward": val,
+            "score": val,
             "done": self.is_done,
         }
 
@@ -652,4 +656,4 @@ class WarehouseEnv:
             if self.packages_delivered == self.total_packages:
                 score = max(score, 0.85)  # minimum 0.85 for full delivery
 
-        return min(0.99, max(0.01, score))
+        return float(min(0.999, max(0.001, score)))
