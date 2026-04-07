@@ -328,7 +328,7 @@ class WarehouseEnv:
         self.max_steps = 0
         self.current_task = ""
         self.is_done = False
-        self.reward = 0.0
+        self.reward = 0.01
         self.last_error = None
 
         self.grid = []
@@ -390,7 +390,7 @@ class WarehouseEnv:
             max_steps=self.max_steps,
             task_instruction=self.instruction,
             done=self.is_done,
-            reward=round(self.reward, 2),
+            reward=round(min(0.99, max(0.01, self.reward)), 2),
             energy=self.energy,
             max_energy=self.max_energy,
             fire_count=len(self.fire_cells),
@@ -409,7 +409,7 @@ class WarehouseEnv:
         self.current_task = task_name
         self.step_count = 0
         self.is_done = False
-        self.reward = 0.0
+        self.reward = 0.01
         self.last_error = None
         self.carrying = False
         self.packages_delivered = 0
@@ -506,7 +506,7 @@ class WarehouseEnv:
 
         if self.is_done:
             self.last_error = "Episode already done."
-            return self._make_obs(), self.reward, True, self.last_error
+            return self._make_obs(), round(min(0.99, max(0.01, self.reward)), 2), True, self.last_error
 
         self.step_count += 1
         cmd = action.action.strip().lower()
@@ -602,14 +602,14 @@ class WarehouseEnv:
             if not self.last_error:
                 self.last_error = "Out of energy!"
 
-        return self._make_obs(), round(self.reward, 2), self.is_done, self.last_error
+        return self._make_obs(), round(min(0.99, max(0.01, self.reward)), 2), self.is_done, self.last_error
 
     def state(self) -> Dict[str, Any]:
         return {
             "episode_id": self.episode_id,
             "step_count": self.step_count,
             "task": self.current_task,
-            "reward": round(self.reward, 2),
+            "reward": round(min(0.99, max(0.01, self.reward)), 2),
             "done": self.is_done,
         }
 

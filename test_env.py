@@ -140,11 +140,12 @@ def test_energy_depletes():
     env.reset("tier4_survivor")
     start_e = env.energy
 
-    # try each direction until one is not blocked
+    # try each direction until energy actually decreases
     moved = False
     for direction in ["move_down", "move_right", "move_left", "move_up"]:
+        energy_before = env.energy
         obs, r, d, e = do(env, direction)
-        if e != "Blocked: wall or boundary.":
+        if env.energy < energy_before:
             moved = True
             break
 
@@ -196,13 +197,18 @@ def test_reward_range():
     for tier in ["tier1_rookie", "tier2_navigator", "tier3_hauler",
                   "tier4_survivor", "tier5_ghost_runner"]:
         env = WarehouseEnv()
-        env.reset(tier)
+        obs = env.reset(tier)
+        # check initial observation reward is strictly in (0, 1)
+        assert 0.0 < obs.reward < 1.0, f"reset reward {obs.reward} out of strict (0,1) on {tier}"
         for _ in range(env.max_steps):
             _, r, d, _ = do(env, "move_down")
-            assert 0.0 <= r <= 1.0, f"reward {r} out of range on {tier}"
+            assert 0.0 < r < 1.0, f"step reward {r} out of strict (0,1) on {tier}"
             if d:
                 break
-    print("  [ok] rewards in [0, 1] for all tiers")
+        # also check state() reward
+        st = env.state()
+        assert 0.0 < st["reward"] < 1.0, f"state reward {st['reward']} out of strict (0,1) on {tier}"
+    print("  [ok] rewards strictly in (0, 1) for all tiers")
 
 
 def test_state_api():
