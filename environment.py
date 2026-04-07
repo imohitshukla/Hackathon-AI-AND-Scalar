@@ -624,31 +624,32 @@ class WarehouseEnv:
         # for tiers 1-3, keep it simple
         if task in ("tier1_rookie", "tier2_navigator"):
             if self.packages_delivered >= self.total_packages:
-                return 0.85 + efficiency * 0.15
-            if self.carrying:
-                return 0.4
-            return 0.0
+                score = 0.85 + efficiency * 0.15
+            elif self.carrying:
+                score = 0.4
+            else:
+                score = 0.0
 
-        if task == "tier3_hauler":
-            base = delivery * 0.85
+        elif task == "tier3_hauler":
+            score = delivery * 0.85
             if self.packages_delivered == self.total_packages:
-                base += efficiency * 0.15
-            return min(1.0, base)
+                score += efficiency * 0.15
 
-        # tiers 4 and 5: composite of 4 signals
-        max_fire_hits = 5
-        safety = max(0.0, 1.0 - self.fire_hits / max_fire_hits)
-        exploration = len(self.visited_cells) / max(1, self.total_visitable)
+        else:
+            # tiers 4 and 5: composite of 4 signals
+            max_fire_hits = 5
+            safety = max(0.0, 1.0 - self.fire_hits / max_fire_hits)
+            exploration = len(self.visited_cells) / max(1, self.total_visitable)
 
-        score = (
-            delivery    * 0.50 +
-            efficiency  * 0.20 +
-            safety      * 0.20 +
-            exploration * 0.10
-        )
+            score = (
+                delivery    * 0.50 +
+                efficiency  * 0.20 +
+                safety      * 0.20 +
+                exploration * 0.10
+            )
 
-        # bonus if fully delivered
-        if self.packages_delivered == self.total_packages:
-            score = max(score, 0.85)  # minimum 0.85 for full delivery
+            # bonus if fully delivered
+            if self.packages_delivered == self.total_packages:
+                score = max(score, 0.85)  # minimum 0.85 for full delivery
 
-        return min(1.0, score)
+        return min(0.99, max(0.01, score))
