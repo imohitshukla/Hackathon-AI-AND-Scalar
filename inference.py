@@ -146,8 +146,8 @@ def run_episode(task, client):
         messages.append({"role": "tool", "tool_call_id": tc.id, "content": status_bits})
 
     ok = env.reward >= 0.85  # tiers give ~0.85+ for full delivery
-    rstr = ",".join(f"{r}" for r in rewards_log) if rewards_log else "0.01"
-    print(f"[END]   success={str(ok).lower()} steps={env.step_count} rewards={rstr}")
+    rstr = ",".join(f"{r}" for r in rewards_log) if rewards_log else "0.0001"
+    print(f"[END]   success={str(ok).lower()} score={env.reward} steps={env.step_count} rewards={rstr}")
 
 
 if __name__ == "__main__":
