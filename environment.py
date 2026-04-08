@@ -7,6 +7,14 @@ from typing import Dict, Any, List, Optional, Tuple
 import uuid, copy, random
 from collections import deque
 
+# strict clamp: validator requires 0 < score < 1, not 0.0, not 1.0
+SCORE_LO = 0.01
+SCORE_HI = 0.99
+
+def _clamp_score(v: float) -> float:
+    """Clamp a score to the open interval (0, 1)."""
+    return float(max(SCORE_LO, min(SCORE_HI, v)))
+
 class Action(BaseModel):
     action: str   # move_up/down/left/right, pickup, dropoff
 
@@ -391,8 +399,8 @@ class WarehouseEnv:
             max_steps=self.max_steps,
             task_instruction=self.instruction,
             done=self.is_done,
-            reward=float(min(0.999, max(0.001, self.reward))),
-            score=float(min(0.999, max(0.001, self.reward))),
+            reward=_clamp_score(self.reward),
+            score=_clamp_score(self.reward),
             energy=self.energy,
             max_energy=self.max_energy,
             fire_count=len(self.fire_cells),
@@ -508,7 +516,7 @@ class WarehouseEnv:
 
         if self.is_done:
             self.last_error = "Episode already done."
-            return self._make_obs(), float(min(0.999, max(0.001, self.reward))), True, self.last_error
+            return self._make_obs(), _clamp_score(self.reward), True, self.last_error
 
         self.step_count += 1
         cmd = action.action.strip().lower()
@@ -519,7 +527,7 @@ class WarehouseEnv:
             self.is_done = True
             self.last_error = "Out of energy!"
             self.reward = self._compute_reward()
-            return self._make_obs(), float(min(0.999, max(0.001, self.reward))), True, self.last_error
+            return self._make_obs(), _clamp_score(self.reward), True, self.last_error
 
         if cmd in DIRS:
             dr, dc = DIRS[cmd]
@@ -604,10 +612,10 @@ class WarehouseEnv:
             if not self.last_error:
                 self.last_error = "Out of energy!"
 
-        return self._make_obs(), float(min(0.999, max(0.001, self.reward))), self.is_done, self.last_error
+        return self._make_obs(), _clamp_score(self.reward), self.is_done, self.last_error
 
     def state(self) -> Dict[str, Any]:
-        val = float(min(0.999, max(0.001, self.reward)))
+        val = _clamp_score(self.reward)
         return {
             "episode_id": self.episode_id,
             "step_count": self.step_count,
@@ -656,4 +664,4 @@ class WarehouseEnv:
             if self.packages_delivered == self.total_packages:
                 score = max(score, 0.85)  # minimum 0.85 for full delivery
 
-        return float(min(0.999, max(0.001, score)))
+        return _clamp_score(score)
