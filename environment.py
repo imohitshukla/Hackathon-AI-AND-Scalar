@@ -8,8 +8,8 @@ import uuid, copy, random
 from collections import deque
 
 # strict clamp: validator requires 0 < score < 1, not 0.0, not 1.0
-SCORE_LO = 0.01
-SCORE_HI = 0.99
+SCORE_LO = 0.0001
+SCORE_HI = 0.9999
 
 def _clamp_score(v: float) -> float:
     """Clamp a score to the open interval (0, 1)."""
@@ -640,7 +640,7 @@ class WarehouseEnv:
             elif self.carrying:
                 score = 0.4
             else:
-                score = 0.0
+                score = 0.0001
 
         elif task == "tier3_hauler":
             score = delivery * 0.85

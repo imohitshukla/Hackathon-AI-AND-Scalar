@@ -94,7 +94,7 @@ def run_episode(task, client):
             print(
                 f"[STEP]  step={env.step_count + 1} "
                 f'action={{"action":"api_error"}} '
-                f"reward={env.reward:.2f} done=true error={exc}"
+                f"reward={env.reward} done=true error={exc}"
             )
             break
 
@@ -108,7 +108,7 @@ def run_episode(task, client):
             print(
                 f"[STEP]  step={env.step_count} "
                 f'action={{"action":"noop"}} '
-                f"reward={rew:.2f} done={str(done).lower()} "
+                f"reward={rew} done={str(done).lower()} "
                 f"error=Agent did not call a tool"
             )
             messages.append({"role": "user", "content": "You need to call take_action."})
@@ -127,7 +127,7 @@ def run_episode(task, client):
         err_out = err if err else "null"
         print(
             f'[STEP]  step={env.step_count} action={{"action":"{chosen}"}} '
-            f"reward={rew:.2f} done={str(done).lower()} error={err_out}"
+            f"reward={rew} done={str(done).lower()} error={err_out}"
         )
 
         # feedback for the model
@@ -146,7 +146,7 @@ def run_episode(task, client):
         messages.append({"role": "tool", "tool_call_id": tc.id, "content": status_bits})
 
     ok = env.reward >= 0.85  # tiers give ~0.85+ for full delivery
-    rstr = ",".join(f"{r:.2f}" for r in rewards_log) if rewards_log else "0.01"
+    rstr = ",".join(f"{r}" for r in rewards_log) if rewards_log else "0.01"
     print(f"[END]   success={str(ok).lower()} steps={env.step_count} rewards={rstr}")
 
 

@@ -13,7 +13,7 @@ app = FastAPI(title="Dynamic Warehouse Robot - OpenEnv")
 
 # strict clamp: validator requires 0 < score < 1
 def _clamp(v: float) -> float:
-    return float(max(0.01, min(0.99, v)))
+    return float(max(0.0001, min(0.9999, v)))
 
 # keep one env instance per session (good enough for eval)
 env = WarehouseEnv()
@@ -68,8 +68,8 @@ def step(req: StepRequest):
 @app.get("/state")
 def state():
     s = env.state()
-    s["reward"] = _clamp(s.get("reward", 0.01))
-    s["score"] = _clamp(s.get("score", 0.01))
+    s["reward"] = _clamp(s.get("reward", 0.0001))
+    s["score"] = _clamp(s.get("score", 0.0001))
     return s
 
 
